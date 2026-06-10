@@ -10,9 +10,22 @@
 		5D5C8FAE2FD97A9800F941FF /* DemonicMusicDashboard.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DemonicMusicDashboard.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		AA1B2C3D4E5F6A7B8C9D0E1F /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 5D5C8FAD2FD97A9800F941FF /* DemonicMusicDashboard */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		5D5C8FB02FD97A9800F941FF /* DemonicMusicDashboard */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				AA1B2C3D4E5F6A7B8C9D0E1F /* PBXFileSystemSynchronizedBuildFileExceptionSet */,
+			);
 			path = DemonicMusicDashboard;
 			sourceTree = "<group>";
 		};
