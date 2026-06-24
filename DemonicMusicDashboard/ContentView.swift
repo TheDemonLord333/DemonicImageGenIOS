@@ -64,8 +64,13 @@ struct LandscapeLayout: View {
                     .shadow(color: DemonicColor.glowPurple, radius: 30)
 
                 if let track = spotify.currentTrack {
-                    LandscapeTrackInfo(track: track)
-                        .transition(.move(edge: .trailing).combined(with: .opacity))
+                    LandscapeTrackInfo(
+                        track: track,
+                        liveProgressMs: spotify.liveProgressMs,
+                        isSaved: spotify.isSaved,
+                        onToggleSaved: { Task { await spotify.toggleSaved() } }
+                    )
+                    .transition(.move(edge: .trailing).combined(with: .opacity))
                 } else {
                     IdleView()
                 }
@@ -111,9 +116,14 @@ struct PortraitLayout: View {
                         .shadow(color: DemonicColor.glowPurple, radius: 24)
 
                     if let track = spotify.currentTrack {
-                        PortraitTrackInfo(track: track)
-                            .padding(.vertical, 24)
-                            .transition(.move(edge: .bottom).combined(with: .opacity))
+                        PortraitTrackInfo(
+                            track: track,
+                            liveProgressMs: spotify.liveProgressMs,
+                            isSaved: spotify.isSaved,
+                            onToggleSaved: { Task { await spotify.toggleSaved() } }
+                        )
+                        .padding(.vertical, 24)
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
                     } else {
                         IdleView()
                             .padding(.vertical, 24)

@@ -104,17 +104,20 @@ struct DemonicProgressBar: View {
 
 struct LandscapeTrackInfo: View {
     let track: SpotifyTrack
+    let liveProgressMs: Int
+    let isSaved: Bool
+    let onToggleSaved: () -> Void
 
     var progress: Double {
         guard track.durationMs > 0 else { return 0 }
-        return Double(track.progressMs) / Double(track.durationMs)
+        return Double(liveProgressMs) / Double(track.durationMs)
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
             Spacer()
 
-            // Playing indicator
+            // Playing indicator + Like button
             HStack(spacing: 8) {
                 ForEach(0..<4) { i in
                     PlayingBar(delay: Double(i) * 0.15, isPlaying: track.isPlaying)
@@ -123,6 +126,10 @@ struct LandscapeTrackInfo: View {
                     .font(.system(size: 11, weight: .bold, design: .monospaced))
                     .foregroundColor(track.isPlaying ? DemonicColor.demonGreen : DemonicColor.textMuted)
                     .tracking(2)
+
+                Spacer()
+
+                LikeButton(isSaved: isSaved, action: onToggleSaved)
             }
 
             // Title
@@ -146,7 +153,7 @@ struct LandscapeTrackInfo: View {
             VStack(spacing: 6) {
                 DemonicProgressBar(progress: progress)
                 HStack {
-                    Text(formatTime(track.progressMs))
+                    Text(formatTime(liveProgressMs))
                         .font(.system(size: 11, design: .monospaced))
                         .foregroundColor(DemonicColor.textMuted)
                     Spacer()
@@ -172,15 +179,18 @@ struct LandscapeTrackInfo: View {
 
 struct PortraitTrackInfo: View {
     let track: SpotifyTrack
+    let liveProgressMs: Int
+    let isSaved: Bool
+    let onToggleSaved: () -> Void
 
     var progress: Double {
         guard track.durationMs > 0 else { return 0 }
-        return Double(track.progressMs) / Double(track.durationMs)
+        return Double(liveProgressMs) / Double(track.durationMs)
     }
 
     var body: some View {
         VStack(spacing: 14) {
-            // Playing bars
+            // Playing bars + Like button
             HStack(spacing: 6) {
                 ForEach(0..<4) { i in
                     PlayingBar(delay: Double(i) * 0.15, isPlaying: track.isPlaying)
@@ -189,6 +199,10 @@ struct PortraitTrackInfo: View {
                     .font(.system(size: 10, weight: .bold, design: .monospaced))
                     .foregroundColor(track.isPlaying ? DemonicColor.demonGreen : DemonicColor.textMuted)
                     .tracking(2)
+
+                Spacer()
+
+                LikeButton(isSaved: isSaved, action: onToggleSaved)
             }
 
             // Title
@@ -214,7 +228,7 @@ struct PortraitTrackInfo: View {
             VStack(spacing: 5) {
                 DemonicProgressBar(progress: progress)
                 HStack {
-                    Text(formatTime(track.progressMs))
+                    Text(formatTime(liveProgressMs))
                         .font(.system(size: 11, design: .monospaced))
                         .foregroundColor(DemonicColor.textMuted)
                     Spacer()
@@ -231,6 +245,35 @@ struct PortraitTrackInfo: View {
     private func formatTime(_ ms: Int) -> String {
         let seconds = ms / 1000
         return String(format: "%d:%02d", seconds / 60, seconds % 60)
+    }
+}
+
+// MARK: - Like / Save Button
+
+struct LikeButton: View {
+    let isSaved: Bool
+    let action: () -> Void
+    @State private var bounce = false
+
+    var body: some View {
+        Button(action: {
+            bounce = true
+            action()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { bounce = false }
+        }) {
+            Image(systemName: isSaved ? "heart.fill" : "heart")
+                .font(.system(size: 20, weight: .semibold))
+                .foregroundStyle(
+                    isSaved
+                        ? LinearGradient(colors: [DemonicColor.demonMagenta, DemonicColor.demonCrimson], startPoint: .top, endPoint: .bottom)
+                        : LinearGradient(colors: [DemonicColor.textMuted, DemonicColor.textMuted], startPoint: .top, endPoint: .bottom)
+                )
+                .scaleEffect(bounce ? 1.35 : 1.0)
+                .shadow(color: isSaved ? DemonicColor.glowCrimson : .clear, radius: 8)
+                .animation(.spring(response: 0.3, dampingFraction: 0.4), value: bounce)
+                .animation(.easeInOut(duration: 0.2), value: isSaved)
+        }
+        .buttonStyle(.plain)
     }
 }
 
