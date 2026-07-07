@@ -75,11 +75,26 @@ struct SpotifyImage: Codable {
 // MARK: - Spotify Auth Config
 
 struct SpotifyConfig {
-    // Replace with your actual Spotify App credentials from developer.spotify.com
-    static let clientID = "YOUR_CLIENT_ID"
-    static let clientSecret = "YOUR_CLIENT_SECRET"
     static let redirectURI = "demonicmusic://callback"
     static let scopes = "user-read-currently-playing user-read-playback-state user-library-read user-library-modify"
+
+    private struct Credentials: Decodable {
+        let clientId: String
+        let clientSecret: String
+    }
+
+    private static var credentials: Credentials = {
+        guard let url = Bundle.main.url(forResource: "SpotifyClientToken", withExtension: "json"),
+              let data = try? Data(contentsOf: url),
+              let creds = try? JSONDecoder().decode(Credentials.self, from: data)
+        else {
+            fatalError("SpotifyClientToken.json fehlt oder ist ungültig.")
+        }
+        return creds
+    }()
+
+    static var clientID: String { credentials.clientId }
+    static var clientSecret: String { credentials.clientSecret }
     static let authURL = "https://accounts.spotify.com/authorize"
     static let tokenURL = "https://accounts.spotify.com/api/token"
     static let currentlyPlayingURL = "https://api.spotify.com/v1/me/player/currently-playing"
