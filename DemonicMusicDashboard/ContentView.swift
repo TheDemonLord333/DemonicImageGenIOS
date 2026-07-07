@@ -38,10 +38,19 @@ struct ContentView: View {
 
 struct LandscapeLayout: View {
     @ObservedObject var spotify: SpotifyService
+    @StateObject private var battery = BatteryMonitor()
 
     var body: some View {
         HStack(spacing: 0) {
-            // LEFT: Album Art
+            // GANZ LINKS: Batterie-Balken senkrecht
+            VStack {
+                Spacer()
+                VerticalBatteryView(monitor: battery)
+                Spacer()
+            }
+            .padding(.leading, 16)
+
+            // MITTE: Album Art
             ZStack {
                 if let track = spotify.currentTrack {
                     AlbumArtView(url: track.albumArtURL, size: 220)
@@ -51,9 +60,9 @@ struct LandscapeLayout: View {
                 }
             }
             .frame(maxWidth: .infinity)
-            .padding(.leading, 40)
+            .padding(.leading, 16)
 
-            // RIGHT: Track Info
+            // RECHTS: Track Info
             ZStack {
                 RoundedRectangle(cornerRadius: 28)
                     .fill(DemonicGradient.cardGradient)
@@ -87,6 +96,7 @@ struct LandscapeLayout: View {
 
 struct PortraitLayout: View {
     @ObservedObject var spotify: SpotifyService
+    @StateObject private var battery = BatteryMonitor()
 
     var body: some View {
         ScrollView {
@@ -130,6 +140,9 @@ struct PortraitLayout: View {
                     }
                 }
                 .padding(.horizontal, 20)
+
+                // Batterie-Balken waagerecht (über dem Abmelden-Button)
+                HorizontalBatteryView(monitor: battery)
 
                 // Logout button
                 Button(action: { spotify.logout() }) {
