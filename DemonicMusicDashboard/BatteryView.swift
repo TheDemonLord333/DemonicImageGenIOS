@@ -65,7 +65,7 @@ class BatteryMonitor: ObservableObject {
     }
 
     var percentText: String {
-        "\(Int(level * 100))%"
+        "\(Int((level * 100).rounded()))%"
     }
 }
 

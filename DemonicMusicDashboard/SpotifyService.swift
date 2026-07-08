@@ -88,10 +88,14 @@ struct SpotifyConfig {
               let data = try? Data(contentsOf: url),
               let creds = try? JSONDecoder().decode(Credentials.self, from: data)
         else {
-            fatalError("SpotifyClientToken.json fehlt oder ist ungültig.")
+            return Credentials(clientId: "", clientSecret: "")
         }
         return creds
     }()
+
+    static var credentialsMissing: Bool {
+        credentials.clientId.isEmpty
+    }
 
     static var clientID: String { credentials.clientId }
     static var clientSecret: String { credentials.clientSecret }

@@ -2,26 +2,29 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var spotify = SpotifyService()
-    @Environment(\.horizontalSizeClass) var hSizeClass
-    @State private var showLoginSheet = false
+    @State private var isLandscape: Bool = {
+        let o = UIDevice.current.orientation
+        if o.isLandscape { return true }
+        if o.isPortrait  { return false }
+        // Fallback: check screen bounds (before first rotation event)
+        let s = UIScreen.main.bounds
+        return s.width > s.height
+    }()
 
     var body: some View {
         ZStack {
-            // Deep background
             DemonicGradient.backgroundGradient
                 .ignoresSafeArea()
 
-            // Ambient particle-like blobs
             AmbientBlobs()
 
             if spotify.isAuthorized {
-                GeometryReader { geo in
-                    let isLandscape = geo.size.width > geo.size.height
-                    if isLandscape {
-                        LandscapeLayout(spotify: spotify)
-                    } else {
-                        PortraitLayout(spotify: spotify)
-                    }
+                if isLandscape {
+                    LandscapeLayout(spotify: spotify)
+                        .transition(.opacity)
+                } else {
+                    PortraitLayout(spotify: spotify)
+                        .transition(.opacity)
                 }
             } else {
                 LoginView(spotify: spotify)
@@ -30,6 +33,22 @@ struct ContentView: View {
         .preferredColorScheme(.dark)
         .onOpenURL { url in
             spotify.handleCallback(url: url)
+        }
+        .onReceive(
+            NotificationCenter.default.publisher(for: UIDevice.orientationDidChangeNotification)
+        ) { _ in
+            let o = UIDevice.current.orientation
+            if o.isLandscape {
+                withAnimation(.easeInOut(duration: 0.3)) { isLandscape = true }
+            } else if o.isPortrait {
+                withAnimation(.easeInOut(duration: 0.3)) { isLandscape = false }
+            }
+        }
+        .onAppear {
+            UIDevice.current.beginGeneratingDeviceOrientationNotifications()
+        }
+        .onDisappear {
+            UIDevice.current.endGeneratingDeviceOrientationNotifications()
         }
     }
 }
@@ -228,47 +247,66 @@ struct LoginView: View {
                     .tracking(4)
             }
 
-            // Login Button
-            Button(action: {
-                if let url = spotify.buildAuthURL() {
-                    UIApplication.shared.open(url)
+            if SpotifyConfig.credentialsMissing {
+                // SpotifyClientToken.json fehlt im Bundle
+                VStack(spacing: 10) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(.system(size: 32))
+                        .foregroundColor(DemonicColor.demonMagenta)
+                    Text("SpotifyClientToken.json fehlt")
+                        .font(.system(size: 15, weight: .bold))
+                        .foregroundColor(DemonicColor.demonMagenta)
+                    Text("Kopiere die Datei in den DemonicMusicDashboard-Ordner\nund baue die App erneut.")
+                        .font(.system(size: 12))
+                        .foregroundColor(DemonicColor.textMuted)
+                        .multilineTextAlignment(.center)
                 }
-            }) {
-                HStack(spacing: 12) {
-                    Image(systemName: "music.note")
-                        .font(.system(size: 18, weight: .bold))
-                    Text("Mit Spotify verbinden")
-                        .font(.system(size: 17, weight: .bold))
-                }
-                .foregroundColor(.black)
-                .frame(maxWidth: 300)
-                .padding(.vertical, 16)
-                .background(
-                    Capsule()
-                        .fill(
-                            LinearGradient(
-                                colors: [DemonicColor.spotifyGreen, DemonicColor.demonGreen],
-                                startPoint: .leading,
-                                endPoint: .trailing
+                .padding(20)
+                .demonicCard()
+                .padding(.horizontal, 20)
+            } else {
+                // Login Button
+                Button(action: {
+                    if let url = spotify.buildAuthURL() {
+                        UIApplication.shared.open(url)
+                    }
+                }) {
+                    HStack(spacing: 12) {
+                        Image(systemName: "music.note")
+                            .font(.system(size: 18, weight: .bold))
+                        Text("Mit Spotify verbinden")
+                            .font(.system(size: 17, weight: .bold))
+                    }
+                    .foregroundColor(.black)
+                    .frame(maxWidth: 300)
+                    .padding(.vertical, 16)
+                    .background(
+                        Capsule()
+                            .fill(
+                                LinearGradient(
+                                    colors: [DemonicColor.spotifyGreen, DemonicColor.demonGreen],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
                             )
-                        )
-                        .shadow(color: DemonicColor.glowGreen, radius: 16)
-                )
-            }
-            .pulsingGlow(color: DemonicColor.spotifyGreen)
+                            .shadow(color: DemonicColor.glowGreen, radius: 16)
+                    )
+                }
+                .pulsingGlow(color: DemonicColor.spotifyGreen)
 
-            if let error = spotify.errorMessage {
-                Text(error)
-                    .font(.system(size: 13))
-                    .foregroundColor(DemonicColor.demonMagenta)
+                if let error = spotify.errorMessage {
+                    Text(error)
+                        .font(.system(size: 13))
+                        .foregroundColor(DemonicColor.demonMagenta)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 32)
+                }
+
+                Text("Benötigt Spotify Premium oder Free\nDu wirst zu Spotify weitergeleitet")
+                    .font(.system(size: 12))
+                    .foregroundColor(DemonicColor.textMuted)
                     .multilineTextAlignment(.center)
-                    .padding(.horizontal, 32)
             }
-
-            Text("Benötigt Spotify Premium oder Free\nDu wirst zu Spotify weitergeleitet")
-                .font(.system(size: 12))
-                .foregroundColor(DemonicColor.textMuted)
-                .multilineTextAlignment(.center)
         }
         .padding(40)
     }
