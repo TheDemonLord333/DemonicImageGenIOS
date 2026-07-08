@@ -2,53 +2,35 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var spotify = SpotifyService()
-    @State private var isLandscape: Bool = {
-        let o = UIDevice.current.orientation
-        if o.isLandscape { return true }
-        if o.isPortrait  { return false }
-        // Fallback: check screen bounds (before first rotation event)
-        let s = UIScreen.main.bounds
-        return s.width > s.height
-    }()
 
     var body: some View {
-        ZStack {
-            DemonicGradient.backgroundGradient
-                .ignoresSafeArea()
+        GeometryReader { geo in
+            let isLandscape = geo.size.width > geo.size.height
 
-            AmbientBlobs()
+            ZStack {
+                DemonicGradient.backgroundGradient
+                    .ignoresSafeArea()
 
-            if spotify.isAuthorized {
-                if isLandscape {
-                    LandscapeLayout(spotify: spotify)
-                        .transition(.opacity)
+                AmbientBlobs()
+
+                if spotify.isAuthorized {
+                    if isLandscape {
+                        LandscapeLayout(spotify: spotify)
+                            .transition(.opacity)
+                    } else {
+                        PortraitLayout(spotify: spotify)
+                            .transition(.opacity)
+                    }
                 } else {
-                    PortraitLayout(spotify: spotify)
-                        .transition(.opacity)
+                    LoginView(spotify: spotify)
                 }
-            } else {
-                LoginView(spotify: spotify)
             }
+            .animation(.easeInOut(duration: 0.3), value: isLandscape)
         }
+        .ignoresSafeArea()
         .preferredColorScheme(.dark)
         .onOpenURL { url in
             spotify.handleCallback(url: url)
-        }
-        .onReceive(
-            NotificationCenter.default.publisher(for: UIDevice.orientationDidChangeNotification)
-        ) { _ in
-            let o = UIDevice.current.orientation
-            if o.isLandscape {
-                withAnimation(.easeInOut(duration: 0.3)) { isLandscape = true }
-            } else if o.isPortrait {
-                withAnimation(.easeInOut(duration: 0.3)) { isLandscape = false }
-            }
-        }
-        .onAppear {
-            UIDevice.current.beginGeneratingDeviceOrientationNotifications()
-        }
-        .onDisappear {
-            UIDevice.current.endGeneratingDeviceOrientationNotifications()
         }
     }
 }
