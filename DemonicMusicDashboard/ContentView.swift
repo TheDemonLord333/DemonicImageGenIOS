@@ -4,14 +4,15 @@ struct ContentView: View {
     @StateObject private var spotify = SpotifyService()
 
     var body: some View {
-        GeometryReader { geo in
-            let isLandscape = geo.size.width > geo.size.height
+        ZStack {
+            // Hintergrund füllt den gesamten Bildschirm (auch unter Statusbar/Notch)
+            DemonicGradient.backgroundGradient
+                .ignoresSafeArea()
+            AmbientBlobs()
 
-            ZStack {
-                DemonicGradient.backgroundGradient
-                    .ignoresSafeArea()
-
-                AmbientBlobs()
+            // Inhalt bleibt innerhalb der Safe Area — GeometryReader OHNE ignoresSafeArea
+            GeometryReader { geo in
+                let isLandscape = geo.size.width > geo.size.height
 
                 if spotify.isAuthorized {
                     if isLandscape {
@@ -25,9 +26,8 @@ struct ContentView: View {
                     LoginView(spotify: spotify)
                 }
             }
-            .animation(.easeInOut(duration: 0.3), value: isLandscape)
+            .animation(.easeInOut(duration: 0.3), value: spotify.isAuthorized)
         }
-        .ignoresSafeArea()
         .preferredColorScheme(.dark)
         .onOpenURL { url in
             spotify.handleCallback(url: url)
