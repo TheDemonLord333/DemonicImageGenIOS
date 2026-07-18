@@ -71,7 +71,7 @@ nano .env
 
 Wichtige Werte:
 
-- `PORT` – intern genutzter Port (Standard `3000`, Nginx leitet später darauf weiter)
+- `PORT` – intern genutzter Port (Standard `3005`, Nginx leitet später darauf weiter)
 - `API_KEY` – setz hier ein zufälliges, langes Geheimnis (z.B. mit
   `openssl rand -hex 32` erzeugt), damit nicht jeder deinen Server als
   kostenlosen Bilder-Proxy missbrauchen kann. Trage denselben Wert später in
@@ -134,7 +134,7 @@ server {
     client_max_body_size 5m;
 
     location / {
-        proxy_pass http://127.0.0.1:3000;
+        proxy_pass http://127.0.0.1:3005;
         proxy_http_version 1.1;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;

@@ -12,7 +12,7 @@ const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const fetch = require('node-fetch');
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3005;
 const API_KEY = process.env.API_KEY || '';
 const CORS_ORIGIN = process.env.CORS_ORIGIN || '*';
 const RATE_LIMIT_WINDOW_MS = Number(process.env.RATE_LIMIT_WINDOW_MS) || 60_000;
