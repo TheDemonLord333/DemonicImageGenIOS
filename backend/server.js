@@ -86,6 +86,10 @@ app.post('/api/generate', requireApiKey, async (req, res) => {
     });
 
     if (!upstreamResponse.ok) {
+      const bodyText = await upstreamResponse.text().catch(() => '');
+      console.error(
+        `[Pollinations] Status ${upstreamResponse.status} fuer URL: ${pollinationsURL}\nBody: ${bodyText.slice(0, 500)}`
+      );
       return res.status(502).json({ error: `Pollinations lieferte Status ${upstreamResponse.status}.` });
     }
 
@@ -97,6 +101,7 @@ app.post('/api/generate', requireApiKey, async (req, res) => {
     res.status(200).send(buffer);
   } catch (error) {
     const isTimeout = error.name === 'TimeoutError' || error.name === 'AbortError';
+    console.error(`[Pollinations] Fehler fuer URL: ${pollinationsURL}`, error);
     res.status(isTimeout ? 504 : 500).json({
       error: isTimeout
         ? 'Zeitüberschreitung bei der Bildgenerierung. Bitte erneut versuchen.'
