@@ -44,6 +44,14 @@ ufw enable
 adduser demonic --disabled-password --gecos ""
 ```
 
+Noch als root PM2 global installieren (globale npm-Pakete landen unter
+`/usr/lib/node_modules` und brauchen root-Rechte; der `demonic`-Nutzer würde
+hier mit `EACCES` scheitern):
+
+```bash
+npm install -g pm2
+```
+
 ## 5. Code auf den Server bringen
 
 Als Nutzer `demonic`:
@@ -80,10 +88,11 @@ Wichtige Werte:
 
 ## 8. Mit PM2 dauerhaft laufen lassen
 
-PM2 hält den Prozess am Leben und startet ihn nach einem Server-Neustart automatisch neu.
+PM2 hält den Prozess am Leben und startet ihn nach einem Server-Neustart automatisch neu
+(als `demonic`-Nutzer, das `pm2`-Kommando selbst wurde bereits in Schritt 4 als root
+installiert):
 
 ```bash
-npm install -g pm2
 pm2 start ecosystem.config.js
 pm2 save
 ```
