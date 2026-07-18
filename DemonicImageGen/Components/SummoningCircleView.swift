@@ -5,6 +5,7 @@
 //  Animierter Beschwörungskreis als Ladeanzeige während der Bildgenerierung.
 //
 
+import Foundation
 import SwiftUI
 
 struct SummoningCircleView: View {
