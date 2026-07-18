@@ -25,6 +25,10 @@ const ALLOWED_MODELS = new Set(['flux', 'turbo', 'flux-realism', 'flux-anime', '
 
 const app = express();
 
+// Hinter Nginx: dem ersten Hop vertrauen, damit req.ip und der
+// X-Forwarded-For-Header korrekt fuer express-rate-limit ausgewertet werden.
+app.set('trust proxy', 1);
+
 app.disable('x-powered-by');
 app.use(helmet());
 app.use(cors({ origin: CORS_ORIGIN }));
