@@ -57,15 +57,17 @@ private struct Star: Shape {
     func path(in rect: CGRect) -> Path {
         var path = Path()
         let center = CGPoint(x: rect.midX, y: rect.midY)
-        let radius = min(rect.width, rect.height) / 2
-        let step = Double.pi * 2 / Double(points) * 2
+        let radius: CGFloat = min(rect.width, rect.height) / 2
+        let step: Double = Double.pi * 2 / Double(points) * 2
 
         var vertices: [CGPoint] = []
         for i in 0..<points {
-            let angle = step * Double(i) - .pi / 2
+            let angle: Double = step * Double(i) - Double.pi / 2
+            let cosAngle: CGFloat = CGFloat(Foundation.cos(angle))
+            let sinAngle: CGFloat = CGFloat(Foundation.sin(angle))
             vertices.append(CGPoint(
-                x: center.x + radius * cos(angle),
-                y: center.y + radius * sin(angle)
+                x: center.x + radius * cosAngle,
+                y: center.y + radius * sinAngle
             ))
         }
         guard let first = vertices.first else { return path }
