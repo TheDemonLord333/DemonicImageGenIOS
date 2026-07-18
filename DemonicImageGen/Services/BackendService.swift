@@ -6,6 +6,7 @@
 //  Pollinations weiterleitet. Die App spricht NIE direkt mit Pollinations.
 //
 
+import Combine
 import Foundation
 
 enum BackendError: LocalizedError {

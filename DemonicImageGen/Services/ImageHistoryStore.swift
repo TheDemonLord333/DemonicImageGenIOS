@@ -6,6 +6,7 @@
 //  Manifest mit Metadaten als JSON.
 //
 
+import Combine
 import Foundation
 import UIKit
 

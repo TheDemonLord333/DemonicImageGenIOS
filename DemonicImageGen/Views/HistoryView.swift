@@ -3,6 +3,7 @@
 //  DemonicImageGen
 //
 
+import Combine
 import SwiftUI
 
 struct HistoryView: View {
