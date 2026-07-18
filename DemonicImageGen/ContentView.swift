@@ -2,20 +2,54 @@
 //  ContentView.swift
 //  DemonicImageGen
 //
-//  Created by David Martens on 18.07.26.
-//
 
+import Combine
 import SwiftUI
+import UIKit
 
 struct ContentView: View {
+    @StateObject private var settings: AppSettings
+    @StateObject private var historyStore: ImageHistoryStore
+    @StateObject private var generatorViewModel: GeneratorViewModel
+
+    init() {
+        let settings = AppSettings()
+        let historyStore = ImageHistoryStore()
+        _settings = StateObject(wrappedValue: settings)
+        _historyStore = StateObject(wrappedValue: historyStore)
+        _generatorViewModel = StateObject(
+            wrappedValue: GeneratorViewModel(settings: settings, historyStore: historyStore)
+        )
+    }
+
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        TabView {
+            GeneratorView(viewModel: generatorViewModel)
+                .tabItem {
+                    Label("Beschwören", systemImage: "flame.fill")
+                }
+
+            HistoryView()
+                .tabItem {
+                    Label("Grimoire", systemImage: "book.closed.fill")
+                }
+
+            SettingsView()
+                .tabItem {
+                    Label("Einstellungen", systemImage: "gearshape.fill")
+                }
         }
-        .padding()
+        .tint(DemonicTheme.spotifyGreen)
+        .environmentObject(settings)
+        .environmentObject(historyStore)
+        .preferredColorScheme(.dark)
+        .onAppear {
+            let appearance = UITabBarAppearance()
+            appearance.configureWithOpaqueBackground()
+            appearance.backgroundColor = UIColor(DemonicTheme.abyss)
+            UITabBar.appearance().standardAppearance = appearance
+            UITabBar.appearance().scrollEdgeAppearance = appearance
+        }
     }
 }
 
