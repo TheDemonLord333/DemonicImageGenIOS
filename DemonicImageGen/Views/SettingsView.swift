@@ -25,25 +25,41 @@ struct SettingsView: View {
                             Text("Einstellungen")
                                 .font(.demonicTitle(24))
                                 .foregroundStyle(DemonicTheme.textPrimary)
-                            Text("Verbinde die App mit deinem eigenen Node-Backend.")
+                            Text("Verbinde die App mit deinem Backend.")
                                 .font(.demonicBody(13))
                                 .foregroundStyle(DemonicTheme.textSecondary)
                         }
 
-                        section(title: "BACKEND-URL") {
-                            GlowTextField(
-                                placeholder: "https://dein-server.de",
-                                text: $settings.backendURL,
-                                keyboardType: .URL
-                            )
+                        providerSection
+
+                        section(title: "EIGENER SERVER (NODE)") {
+                            VStack(spacing: 10) {
+                                GlowTextField(
+                                    placeholder: "https://dein-server.de",
+                                    text: $settings.nodeBackendURL,
+                                    keyboardType: .URL
+                                )
+                                GlowTextField(
+                                    placeholder: "API-Key (optional)",
+                                    text: $settings.nodeAPIKey,
+                                    isSecure: true
+                                )
+                            }
                         }
 
-                        section(title: "API-KEY (OPTIONAL)") {
-                            GlowTextField(
-                                placeholder: "Nur nötig, falls im Backend gesetzt",
-                                text: $settings.apiKey,
-                                isSecure: true
-                            )
+                        section(title: "CLOUDFLARE WORKERS AI") {
+                            VStack(spacing: 10) {
+                                GlowTextField(
+                                    placeholder: "https://api2.deinedomain.de",
+                                    text: $settings.cloudflareBackendURL,
+                                    keyboardType: .URL
+                                )
+                                GlowTextField(
+                                    placeholder: "API-Key (optional)",
+                                    text: $settings.cloudflareAPIKey,
+                                    isSecure: true
+                                )
+                            }
                         }
 
                         GlowButton(
@@ -59,7 +75,7 @@ struct SettingsView: View {
                                 .font(.demonicHeadline(12))
                                 .foregroundStyle(DemonicTheme.textFaint)
                                 .tracking(1.2)
-                            Text("Demonic Pic Gen sendet deine Prompts an dein eigenes Backend, welches sie an die Pollinations-API weiterleitet. Es werden keine Daten an Dritte außer Pollinations übertragen.")
+                            Text("Demonic Pic Gen sendet deine Prompts an das oben ausgewählte Backend. Beide Backends laufen auf deinem eigenen Server: eines leitet an Pollinations weiter, das andere an Cloudflare Workers AI. Es werden keine Daten an sonstige Dritte übertragen.")
                                 .font(.demonicBody(13))
                                 .foregroundStyle(DemonicTheme.textSecondary)
                         }
@@ -78,6 +94,25 @@ struct SettingsView: View {
             .toolbarBackground(.hidden, for: .navigationBar)
         }
         .preferredColorScheme(.dark)
+    }
+
+    private var providerSection: some View {
+        section(title: "AKTIVES BACKEND") {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 10) {
+                    ForEach(BackendProvider.allCases) { provider in
+                        StyleChip(
+                            title: provider.displayName,
+                            icon: provider.icon,
+                            isSelected: settings.activeProvider == provider
+                        ) {
+                            settings.activeProvider = provider
+                            connectionState = .idle
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private func section<Content: View>(title: String, @ViewBuilder content: () -> Content) -> some View {
