@@ -11,6 +11,7 @@ struct GeneratorView: View {
     @ObservedObject var viewModel: GeneratorViewModel
     @FocusState private var isPromptFocused: Bool
     @State private var showSaveConfirmation = false
+    @State private var isStylePickerPresented = false
 
     var body: some View {
         NavigationStack {
@@ -51,6 +52,9 @@ struct GeneratorView: View {
             .toolbarBackground(.hidden, for: .navigationBar)
         }
         .preferredColorScheme(.dark)
+        .fullScreenCover(isPresented: $isStylePickerPresented) {
+            StylePickerView(selectedStyle: $viewModel.selectedStyle)
+        }
     }
 
     private var header: some View {
@@ -82,19 +86,33 @@ struct GeneratorView: View {
                 .foregroundStyle(DemonicTheme.textFaint)
                 .tracking(1.2)
 
-            ScrollView(.horizontal, showsIndicators: false) {
+            Button {
+                isPromptFocused = false
+                isStylePickerPresented = true
+            } label: {
                 HStack(spacing: 10) {
-                    ForEach(StylePreset.allCases) { style in
-                        StyleChip(
-                            title: style.rawValue,
-                            icon: style.icon,
-                            isSelected: viewModel.selectedStyle == style
-                        ) {
-                            viewModel.selectedStyle = style
-                        }
-                    }
+                    Image(systemName: viewModel.selectedStyle.icon)
+                        .foregroundStyle(DemonicTheme.summonGradient)
+                    Text(viewModel.selectedStyle.displayName)
+                        .font(.demonicHeadline(15))
+                        .foregroundStyle(DemonicTheme.textPrimary)
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(DemonicTheme.textFaint)
                 }
+                .padding(.horizontal, 14)
+                .padding(.vertical, 12)
+                .background(
+                    RoundedRectangle(cornerRadius: DemonicTheme.cornerRadiusSmall)
+                        .fill(DemonicTheme.surface)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: DemonicTheme.cornerRadiusSmall)
+                        .stroke(DemonicTheme.hairline, lineWidth: 1)
+                )
             }
+            .buttonStyle(.plain)
         }
     }
 
@@ -105,13 +123,32 @@ struct GeneratorView: View {
                 .foregroundStyle(DemonicTheme.textFaint)
                 .tracking(1.2)
 
-            Picker("Format", selection: $viewModel.selectedSize) {
+            Menu {
                 ForEach(GenerationSize.allCases) { size in
-                    Text(size.rawValue).tag(size)
+                    Button {
+                        viewModel.selectedSize = size
+                    } label: {
+                        Label(size.rawValue, systemImage: size.icon)
+                    }
                 }
+            } label: {
+                HStack(spacing: 8) {
+                    Image(systemName: viewModel.selectedSize.icon)
+                    Text(viewModel.selectedSize.rawValue)
+                        .font(.demonicHeadline(14))
+                    Image(systemName: "chevron.up.chevron.down")
+                        .font(.system(size: 11, weight: .semibold))
+                }
+                .foregroundStyle(DemonicTheme.textPrimary)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 10)
+                .background(
+                    Capsule().fill(DemonicTheme.surface)
+                )
+                .overlay(
+                    Capsule().stroke(DemonicTheme.hairline, lineWidth: 1)
+                )
             }
-            .pickerStyle(.segmented)
-            .tint(DemonicTheme.demonicViolet)
         }
     }
 

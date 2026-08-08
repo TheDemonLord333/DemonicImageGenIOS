@@ -10,7 +10,7 @@ import UIKit
 @MainActor
 final class GeneratorViewModel: ObservableObject {
     @Published var prompt: String = ""
-    @Published var selectedStyle: StylePreset = .shadowRealm
+    @Published var selectedStyle: StylePreset = .none
     @Published var selectedSize: GenerationSize = .square
     @Published var isGenerating: Bool = false
     @Published var resultImage: UIImage?
