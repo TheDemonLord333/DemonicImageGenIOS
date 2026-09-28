@@ -34,6 +34,16 @@ const MODEL_MAP = {
 };
 const DEFAULT_MODEL_KEY = 'flux';
 
+// Nicht alle Modelle akzeptieren dieselben Parameter. flux-1-schnell lehnt
+// width/height/seed inzwischen als "additional properties" hart ab (Cloudflare
+// hat die Schema-Validierung verschaerft) und kennt nur prompt + steps.
+function buildModelInput(modelKey, { prompt, width, height, seed }) {
+  if (modelKey === 'flux') {
+    return { prompt, steps: 8 };
+  }
+  return { prompt, width, height, seed };
+}
+
 const app = express();
 
 // Hinter Nginx: dem ersten Hop vertrauen, damit req.ip und der
@@ -105,12 +115,9 @@ app.post('/api/generate', requireApiKey, async (req, res) => {
         Authorization: `Bearer ${CF_API_TOKEN}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        prompt,
-        width: safeWidth,
-        height: safeHeight,
-        seed: safeSeed,
-      }),
+      body: JSON.stringify(
+        buildModelInput(modelKey, { prompt, width: safeWidth, height: safeHeight, seed: safeSeed })
+      ),
       signal: AbortSignal.timeout(90_000),
     });
 
@@ -156,6 +163,15 @@ app.post('/api/generate', requireApiKey, async (req, res) => {
 
 app.use((req, res) => {
   res.status(404).json({ error: 'Route nicht gefunden.' });
+});
+
+// Faengt kaputte JSON-Bodies ab (u.a. von Bot-Scans), statt sie als
+// unbehandelten Fehler zu loggen.
+app.use((err, req, res, next) => {
+  if (err.type === 'entity.parse.failed') {
+    return res.status(400).json({ error: 'Ungueltiger JSON-Body.' });
+  }
+  next(err);
 });
 
 app.listen(PORT, () => {
