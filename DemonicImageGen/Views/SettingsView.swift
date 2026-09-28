@@ -62,6 +62,8 @@ struct SettingsView: View {
                             }
                         }
 
+                        cloudflareModelSection
+
                         GlowButton(
                             title: connectionTitle,
                             systemImage: connectionIcon,
@@ -122,6 +124,32 @@ struct SettingsView: View {
                 .foregroundStyle(DemonicTheme.textFaint)
                 .tracking(1.2)
             content()
+        }
+    }
+
+    private var cloudflareModelSection: some View {
+        section(title: "CLOUDFLARE-MODELL") {
+            VStack(alignment: .leading, spacing: 8) {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 10) {
+                        ForEach(CloudflareModel.allCases) { model in
+                            StyleChip(
+                                title: model.displayName,
+                                icon: model.icon,
+                                isSelected: settings.cloudflareModel == model
+                            ) {
+                                settings.cloudflareModel = model
+                            }
+                        }
+                    }
+                }
+
+                if !settings.cloudflareModel.supportsCustomSize {
+                    Text("Dieses Modell liefert immer sein festes Standardformat – die Formatauswahl im Beschwören-Tab ist dafür deaktiviert.")
+                        .font(.demonicBody(12))
+                        .foregroundStyle(DemonicTheme.textFaint)
+                }
+            }
         }
     }
 

@@ -44,7 +44,8 @@ final class GeneratorViewModel: ObservableObject {
                 prompt: fullPrompt,
                 width: width,
                 height: height,
-                seed: seed
+                seed: seed,
+                model: settings.activeModel
             )
             guard let image = UIImage(data: data) else {
                 throw BackendError.decoding

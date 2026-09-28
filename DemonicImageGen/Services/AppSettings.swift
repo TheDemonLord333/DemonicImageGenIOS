@@ -18,10 +18,34 @@ final class AppSettings: ObservableObject {
 
     @AppStorage("cloudflareBackendURL") var cloudflareBackendURL: String = "https://your-server.example.com"
     @AppStorage("cloudflareAPIKey") var cloudflareAPIKey: String = ""
+    @AppStorage("cloudflareModel") private var cloudflareModelRaw: String = CloudflareModel.flux.rawValue
 
     var activeProvider: BackendProvider {
         get { BackendProvider(rawValue: activeProviderRaw) ?? .node }
         set { activeProviderRaw = newValue.rawValue }
+    }
+
+    var cloudflareModel: CloudflareModel {
+        get { CloudflareModel(rawValue: cloudflareModelRaw) ?? .flux }
+        set { cloudflareModelRaw = newValue.rawValue }
+    }
+
+    /// Modell-Kurzname, der beim Generieren ans aktive Backend gesendet wird.
+    var activeModel: String {
+        switch activeProvider {
+        case .node: return "flux"
+        case .cloudflare: return cloudflareModel.rawValue
+        }
+    }
+
+    /// Ob das aktuell aktive Backend+Modell eine eigene Bildgröße akzeptiert.
+    /// Pollinations (Node-Backend) tut das immer; bei Cloudflare Workers AI
+    /// hängt es vom gewählten Modell ab (siehe CloudflareModel).
+    var activeModelSupportsCustomSize: Bool {
+        switch activeProvider {
+        case .node: return true
+        case .cloudflare: return cloudflareModel.supportsCustomSize
+        }
     }
 
     /// URL/Key des aktuell aktiven Providers. BackendService kennt nur diese

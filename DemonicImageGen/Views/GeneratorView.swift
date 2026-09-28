@@ -9,6 +9,7 @@ import UIKit
 
 struct GeneratorView: View {
     @ObservedObject var viewModel: GeneratorViewModel
+    @EnvironmentObject private var settings: AppSettings
     @FocusState private var isPromptFocused: Bool
     @State private var showSaveConfirmation = false
     @State private var isStylePickerPresented = false
@@ -149,6 +150,14 @@ struct GeneratorView: View {
                     Capsule().stroke(DemonicTheme.hairline, lineWidth: 1)
                 )
             }
+            .disabled(!settings.activeModelSupportsCustomSize)
+            .opacity(settings.activeModelSupportsCustomSize ? 1 : 0.4)
+
+            if !settings.activeModelSupportsCustomSize {
+                Text("Das aktive Modell unterstützt keine eigene Formatauswahl.")
+                    .font(.demonicBody(12))
+                    .foregroundStyle(DemonicTheme.textFaint)
+            }
         }
     }
 
@@ -227,4 +236,5 @@ struct GeneratorView: View {
 
 #Preview {
     GeneratorView(viewModel: GeneratorViewModel(settings: AppSettings(), historyStore: ImageHistoryStore()))
+        .environmentObject(AppSettings())
 }
