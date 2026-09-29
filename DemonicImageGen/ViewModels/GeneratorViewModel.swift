@@ -10,7 +10,7 @@ import UIKit
 @MainActor
 final class GeneratorViewModel: ObservableObject {
     @Published var prompt: String = ""
-    @Published var selectedStyle: StylePreset = .shadowRealm
+    @Published var selectedStyle: StylePreset = .none
     @Published var selectedSize: GenerationSize = .square
     @Published var isGenerating: Bool = false
     @Published var resultImage: UIImage?
@@ -44,7 +44,8 @@ final class GeneratorViewModel: ObservableObject {
                 prompt: fullPrompt,
                 width: width,
                 height: height,
-                seed: seed
+                seed: seed,
+                model: settings.activeModel
             )
             guard let image = UIImage(data: data) else {
                 throw BackendError.decoding

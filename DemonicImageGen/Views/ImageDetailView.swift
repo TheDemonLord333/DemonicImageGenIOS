@@ -41,7 +41,7 @@ struct ImageDetailView: View {
                                 .foregroundStyle(DemonicTheme.textPrimary)
 
                             HStack(spacing: 14) {
-                                Label(item.style.rawValue, systemImage: item.style.icon)
+                                Label(item.style.displayName, systemImage: item.style.icon)
                                 Label("\(item.width)×\(item.height)", systemImage: "aspectratio")
                             }
                             .font(.demonicBody(12))
