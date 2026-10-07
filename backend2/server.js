@@ -118,7 +118,7 @@ app.post('/api/generate', requireApiKey, async (req, res) => {
       body: JSON.stringify(
         buildModelInput(modelKey, { prompt, width: safeWidth, height: safeHeight, seed: safeSeed })
       ),
-      signal: AbortSignal.timeout(90_000),
+      signal: AbortSignal.timeout(170_000),
     });
 
     if (!cfResponse.ok) {
