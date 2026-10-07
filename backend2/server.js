@@ -118,7 +118,7 @@ app.post('/api/generate', requireApiKey, async (req, res) => {
       body: JSON.stringify(
         buildModelInput(modelKey, { prompt, width: safeWidth, height: safeHeight, seed: safeSeed })
       ),
-      signal: AbortSignal.timeout(90_000),
+      signal: AbortSignal.timeout(170_000),
     });
 
     if (!cfResponse.ok) {
@@ -126,7 +126,22 @@ app.post('/api/generate', requireApiKey, async (req, res) => {
       console.error(
         `[Workers AI] Status ${cfResponse.status} fuer Modell ${modelId}\nBody: ${bodyText.slice(0, 500)}`
       );
-      return res.status(502).json({ error: `Cloudflare Workers AI lieferte Status ${cfResponse.status}.` });
+
+      let cfMessage = '';
+      try {
+        cfMessage = JSON.parse(bodyText)?.errors?.[0]?.message || '';
+      } catch {
+        // Body war kein JSON (z.B. HTML-Fehlerseite) -- dann bleibt cfMessage leer.
+      }
+      // Cloudflare verdoppelt das "AiError:"-Praefix manchmal
+      // ("AiError: AiError: ..."); beide Vorkommen entfernen.
+      const cleanedMessage = cfMessage.replace(/^(AiError:\s*)+/i, '').trim();
+
+      return res.status(502).json({
+        error: cleanedMessage
+          ? `Cloudflare Workers AI: ${cleanedMessage}`
+          : `Cloudflare Workers AI lieferte Status ${cfResponse.status}.`,
+      });
     }
 
     const contentType = cfResponse.headers.get('content-type') || '';

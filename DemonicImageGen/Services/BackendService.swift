@@ -72,7 +72,7 @@ final class BackendService {
 
         let body = GenerateRequestBody(prompt: prompt, width: width, height: height, seed: seed, model: model)
         request.httpBody = try JSONEncoder().encode(body)
-        request.timeoutInterval = 120
+        request.timeoutInterval = 200
 
         let (data, response) = try await session.data(for: request)
 
