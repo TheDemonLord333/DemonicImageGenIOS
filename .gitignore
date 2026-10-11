@@ -21,3 +21,5 @@ DerivedData/
 
 # Spotify credentials — bleibt lokal, wird nie committed
 DemonicMusicDashboard/SpotifyClientToken.json
+node_modules/
+.env
